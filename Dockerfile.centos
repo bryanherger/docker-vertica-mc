@@ -1,0 +1,31 @@
+FROM centos:centos7
+MAINTAINER Bryan Herger <bryanherger@gmail.com>
+
+ARG VERTICA_PACKAGE="vertica-console-11.1.0-0.x86_64.RHEL6.rpm"
+ARG VERTICA_LICENSE="CE"
+
+ENV LANG en_US.utf8
+ENV TZ UTC
+
+ADD packages/${VERTICA_PACKAGE} /tmp/
+
+RUN yum -q -y update \
+# && yum -q -y install openssl curl \
+# && /usr/bin/curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/download/1.1/gosu' \
+# && /bin/chmod +x /usr/local/bin/gosu \
+ && /usr/sbin/groupadd -r verticadba \
+ && /usr/sbin/useradd -r -m -s /bin/bash -g verticadba dbadmin \
+ && yum install -y openssl curl which mcelog gdb sysstat openssh-server openssh-clients iproute ntp nano 
+# && yum localinstall -q -y /tmp/${VERTICA_PACKAGE} \
+# && /bin/rm -f /tmp/vertica*
+
+# yum localinstall -q -y /tmp/vertica-console-11.1.0-0.x86_64.RHEL6.rpm
+
+# startup
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+ADD ./docker-entrypoint.sh /usr/local/bin/
+RUN chmod a+x /usr/local/bin/docker-entrypoint.sh
+
+# allow inbound SSH and Vertica sockets
+EXPOSE 22
+EXPOSE 5450

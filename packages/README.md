@@ -1,0 +1,1 @@
+Place the vertica-console RPM here and reference the full name in the Dockerfile.
